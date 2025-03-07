@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .product { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        button { margin: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Добавить новый товар</h2>
+    <form id="productForm">
+        <input type="text" id="name" placeholder="Название" required><br>
+        <input type="number" id="price" placeholder="Цена" required><br>
+        <textarea id="description" placeholder="Описание"></textarea><br>
+        <input type="text" id="categories" placeholder="Категории (через запятую)"><br>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <h2>Список товаров</h2>
+    <div id="productList"></div>
+
+    <script>
+        const API_URL = "http://localhost:3000/products";
+
+        function loadProducts() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(products => {
+                    const productList = document.getElementById("productList");
+                    productList.innerHTML = "";
+                    products.forEach(product => {
+                        const productDiv = document.createElement("div");
+                        productDiv.className = "product";
+                        productDiv.innerHTML = `
+                            <h3>${product.name}</h3>
+                            <p>Цена: ${product.price}</p>
+                            <p>Описание: ${product.description}</p>
+                            <p>Категории: ${product.categories ? product.categories.join(", ") : "Нет"}</p>
+                            <button onclick="editProduct(${product.id})">Редактировать</button>
+                            <button onclick="deleteProduct(${product.id})">Удалить</button>
+                        `;
+                        productList.appendChild(productDiv);
+                    });
+                })
+                .catch(error => console.error("Ошибка загрузки товаров:", error));
+        }
+
+        document.getElementById("productForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const name = document.getElementById("name").value;
+            const price = document.getElementById("price").value;
+            const description = document.getElementById("description").value.trim() || "Описание отсутствует";
+            const categories = document.getElementById("categories").value.trim() ? document.getElementById("categories").value.split(",").map(cat => cat.trim()) : [];
+
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, price, description, categories })
+            })
+            .then(() => {
+                alert("Товар добавлен!");
+                this.reset();
+                loadProducts();
+                localStorage.setItem("newProductAdded", "true");
+            })
+            .catch(error => console.error("Ошибка при добавлении товара:", error));
+        });
+
+        function deleteProduct(id) {
+            if (confirm("Вы уверены, что хотите удалить этот товар?")) {
+                fetch(`${API_URL}/${id}`, { method: "DELETE" })
+                    .then(() => loadProducts())
+                    .catch(error => console.error("Ошибка при удалении товара:", error));
+            }
+        }
+
+        function editProduct(id) {
+        fetch(`${API_URL}/${id}`)
+            .then(response => response.json())
+            .then(product => {
+                const newName = prompt("Введите новое название:", product.name);
+                const newPrice = prompt("Введите новую цену:", product.price);
+                const newDescription = prompt("Введите новое описание:", product.description);
+                const newCategories = prompt("Введите новые категории (через запятую):", product.categories.join(","));
+
+                const updatedProduct = {
+                    name: newName || product.name,
+                    price: newPrice || product.price,
+                    description: newDescription || product.description,
+                    categories: newCategories ? newCategories.split(",").map(cat => cat.trim()) : product.categories
+                };
+
+                fetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedProduct)
+                })
+                .then(() => loadProducts())
+                .catch(error => console.error("Ошибка при редактировании товара:", error));
+            })
+            .catch(error => console.error("Ошибка загрузки товара для редактирования:", error));
+        }
+        loadProducts();
+    </script>
+</body>
+</html>
