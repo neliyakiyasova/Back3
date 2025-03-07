@@ -85,7 +85,6 @@ app.get('/products/:id', (req, res) => {
         res.status(404).json({ message: 'Product not found' });
     }
 });
-// Обновляем продукт по ID
 
 app.put("/products/:id", (req, res) => {
     const { id } = req.params;
