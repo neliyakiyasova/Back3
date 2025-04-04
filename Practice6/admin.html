@@ -23,7 +23,12 @@
 
     <h2>Список товаров</h2>
     <div id="productList"></div>
-
+    <div id="chat">
+        <h3>Чат с покупателем</h3>
+        <div id="messages" style="border:1px solid #ccc; height:200px; overflow-y:auto; margin-bottom:10px;"></div>
+        <input type="text" id="chatInput" placeholder="Введите сообщение..." />
+        <button onclick="sendMessage()">Отправить</button>
+      </div>
     <script>
         const API_URL = "http://localhost:3000/products";
 
@@ -107,5 +112,27 @@
         }
         loadProducts();
     </script>
+    <script>
+        
+        const ws = new WebSocket('ws://localhost:7070');
+      
+        const messagesDiv = document.getElementById('messages');
+        const chatInput = document.getElementById('chatInput');
+      
+        ws.onmessage = (event) => {
+          const msg = document.createElement('div');
+          msg.textContent = event.data;
+          messagesDiv.appendChild(msg);
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+      
+        function sendMessage() {
+          const text = chatInput.value;
+          if (text.trim() !== '') {
+            ws.send("Администратор: " + text);
+            chatInput.value = '';
+          }
+        }
+      </script>
 </body>
 </html>

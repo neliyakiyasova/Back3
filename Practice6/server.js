@@ -1,8 +1,7 @@
 const fs = require('fs'); 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { graphqlHTTP } = require('express-graphql');
-const { buildSchema } = require('graphql');
+
 const path = require('path');
 
 const app = express();
@@ -32,31 +31,6 @@ const swaggerOptions = {
     },
     apis: ['openapi.yaml'], 
 };
-const schema = buildSchema(`
-    type Product {
-      id: ID!
-      name: String!
-      price: Float!
-      description: String
-      categories: [String]
-    }
-  
-    type Query {
-      products: [Product]
-      product(id: ID!): Product
-    }
-  `);
-  
-  const root = {
-    products: () => products, 
-    product: ({ id }) => products.find(p => p.id == id),
-  };
-  
-  app.use('/graphql', graphqlHTTP({
-    schema: schema,
-    rootValue: root,
-    graphiql: true, // Включаем GraphiQL для тестов
-  }));
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
