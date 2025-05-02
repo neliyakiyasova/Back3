@@ -1,7 +1,12 @@
 {
   "dependencies": {
+    "@reduxjs/toolkit": "^2.7.0",
+    "axios": "^1.8.4",
     "express-graphql": "^0.12.0",
     "graphql": "^15.10.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-redux": "^9.2.0",
     "ws": "^8.18.1"
   }
 }
