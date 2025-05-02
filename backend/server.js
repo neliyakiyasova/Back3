@@ -12,7 +12,7 @@ const app = express();
 const PORT = 3000;
 const cors = require('cors');
 app.use(cors({
-    origin: 'http://localhost:5173', // Укажите адрес вашего фронтенда
+    origin: 'http://localhost:5173', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
